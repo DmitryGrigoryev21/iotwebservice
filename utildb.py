@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+
+
 class utildb():
     @staticmethod
     def insert(table: str, data: object) -> str:
@@ -19,8 +22,13 @@ class utildb():
         return "select * from %s" % table
 
     @staticmethod
-    def select_by_id(table: str, id: int) -> str:
-        return "select * from %s where id=%d" % (table, id)
+    def select_last(table: str) -> str:
+        return "select * from %s ORDER BY %s DESC LIMIT 1" % (table, 'id')
+
+
+    # @staticmethod
+    # def select_by_id(table: str, id: int) -> str:
+    #     return "select * from %s where id=%d" % (table, id)
 
     @staticmethod
     def select_all_where(table: str, recordcolumn: str, recordval: any) -> str:
@@ -28,6 +36,22 @@ class utildb():
             sql = "select * from %s where %s = %s" % (table, recordcolumn, recordval)
         else:
             sql = "select * from %s where %s = \"%s\"" % (table, recordcolumn, recordval)
+        print(sql)
+        return sql
+
+
+    @staticmethod
+    def select_between(table: str, end: str) -> str:
+        now = datetime.now()
+        if end == 'day':
+            time_start = now - timedelta(days=1)
+        elif end == 'week':
+            time_start = now - timedelta(days=7)
+        elif end == 'month':
+            time_start = now - timedelta(days=30)
+        else:
+            time_start = now
+        sql = "select * from %s where %s BETWEEN '%s' AND '%s'" % (table, 'date_time', time_start, now)
         print(sql)
         return sql
 

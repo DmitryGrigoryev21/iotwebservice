@@ -47,7 +47,7 @@ course.course_name = 'AZURE'
 # db.execute(utildb.update_by_id('student_table',student,1))
 
 # print(db.query(utildb.select_by_id('student_table',1)))
-# print(db.query(utildb.select_all('student_table')))
+print(db.query(utildb.select_all('student_table')))
 # print(db.query(utildb.select_all('course_table')))
 
 db.die()
