@@ -52,7 +52,6 @@ class utildb():
         else:
             time_start = now
         sql = "select * from %s where %s BETWEEN '%s' AND '%s'" % (table, 'date_time', time_start, now)
-        print(sql)
         return sql
 
     @staticmethod
@@ -69,6 +68,14 @@ class utildb():
     @staticmethod
     def delete_by_id(table: str, id: int) -> str:
         return "delete from %s where id=%d" % (table, id)
+
+    @staticmethod
+    def delete_expired(table: str) -> str:
+        now = datetime.now()
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        print("delete from %s where %s<'%s'" % (table, 'expires_at', current_time))
+        return "delete from %s where %s<'%s'" % (table, 'expires_at', current_time)
+
 
     @staticmethod
     def delete_all(table: str) -> str:
