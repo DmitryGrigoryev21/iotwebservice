@@ -1,7 +1,8 @@
+import decimal
 import uuid
 from datetime import datetime, timedelta
 
-from flask import Flask
+import flask
 from flask import jsonify, request
 
 from utildb import utildb
@@ -10,12 +11,24 @@ from tempClass import Temperature
 from humidClass import Humidity
 from tokenClass import Token
 
+from flask.json import JSONEncoder
+#put it in /usr/local/bin and chmod 777 the file
+class JsonEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, decimal.Decimal):
+            return float(obj)
+        return JSONEncoder.default(self, obj)
+
+
 AUTH_HEADER = 'Authorization'
 USER_TYPE_SERVICE = 'service'
 USER_TYPE_USER = 'user'
 TOKEN_LIFESPAN = timedelta(hours= 3)
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
+
+app.json_encoder = JsonEncoder
+
 
 @app.route('/', methods=['GET'])
 def home():
