@@ -56,7 +56,7 @@ def get_Last():
         return jsonify(result)
 
 @app.route('/data/timerange/<string:range>', methods=['GET'])
-def get_In_Range_Temp(range):
+def get_In_Range(range):
     auth_result = assert_token(request, USER_TYPE_USER)
     if auth_result != None:
         return auth_result
@@ -138,6 +138,26 @@ def add_Data():
                     db.die()
 
         return flask.Response(response="success", status=200)
+
+@app.route('/token/revoke', methods=['POST'])
+def token_revoke():
+    auth_result=assert_token(request, USER_TYPE_USER)
+    if auth_result != None:
+        return auth_result
+
+    if not request.args:
+        token = request.headers[AUTH_HEADER]
+        try:
+            db = managedb()
+            db.execute(utildb.delete_by_token('token_table',token))
+        except Exception as e:
+            return flask.Response(response=str(e), status=500)
+        finally:
+            if db != None:
+                db.die()
+
+        return flask.Response(response="success", status=200)
+
 
 def assert_token(request, user_type):
     if not AUTH_HEADER in request.headers.keys():

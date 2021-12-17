@@ -70,6 +70,10 @@ class utildb():
         return "delete from %s where id=%d" % (table, id)
 
     @staticmethod
+    def delete_by_token(table: str, token: str) -> str:
+        return "delete from %s where token=\"%s\"" % (table, token)
+
+    @staticmethod
     def delete_expired(table: str) -> str:
         now = datetime.now()
         current_time = now.strftime("%Y-%m-%d %H:%M:%S")
