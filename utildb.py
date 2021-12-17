@@ -23,7 +23,7 @@ class utildb():
 
     @staticmethod
     def select_last(table: str) -> str:
-        return "select * from %s ORDER BY %s DESC LIMIT 1" % (table, 'id')
+        return "select * from %s where %s = (select MAX(%s) FROM %s)" % (table, 'date_time', 'date_time', table)
 
 
     # @staticmethod
@@ -73,7 +73,7 @@ class utildb():
     def delete_expired(table: str) -> str:
         now = datetime.now()
         current_time = now.strftime("%Y-%m-%d %H:%M:%S")
-        print("delete from %s where %s<'%s'" % (table, 'expires_at', current_time))
+
         return "delete from %s where %s<'%s'" % (table, 'expires_at', current_time)
 
 

@@ -7,8 +7,7 @@ from flask import jsonify, request
 
 from utildb import utildb
 from managedb import managedb
-from tempClass import Temperature
-from humidClass import Humidity
+from dataClass import Data
 from tokenClass import Token
 
 from flask.json import JSONEncoder
@@ -34,74 +33,38 @@ app.json_encoder = JsonEncoder
 def home():
     return "Welcome."
 
-@app.route('/data/all/temperature', methods=['GET'])
-def get_All_Temp():
+@app.route('/data/all', methods=['GET'])
+def get_All():
     auth_result = assert_token(request, USER_TYPE_USER)
     if auth_result != None:
         return auth_result
     if not request.args:
         db = managedb()
-        resulttemp = db.query(utildb.select_all('temperature_table'))
+        result = db.query(utildb.select_all('data_table'))
         db.die()
-        return jsonify(resulttemp)
+        return jsonify(result)
 
-@app.route('/data/all/humidity', methods=['GET'])
-def get_All_Humid():
+@app.route('/data/last', methods=['GET'])
+def get_Last():
     auth_result = assert_token(request, USER_TYPE_USER)
     if auth_result != None:
         return auth_result
     if not request.args:
         db = managedb()
-        resulthumid = db.query(utildb.select_all('humidity_table'))
+        result = db.query(utildb.select_last('data_table'))
         db.die()
-        return jsonify(resulthumid)
+        return jsonify(result)
 
-
-@app.route('/data/last/temperature', methods=['GET'])
-def get_Last_Temp():
-    auth_result = assert_token(request, USER_TYPE_USER)
-    if auth_result != None:
-        return auth_result
-    if not request.args:
-        db = managedb()
-        resulttemp = db.query(utildb.select_last('temperature_table'))
-        db.die()
-        return jsonify(resulttemp)
-
-@app.route('/data/last/humidity', methods=['GET'])
-def get_Last_Humid():
-    auth_result = assert_token(request, USER_TYPE_USER)
-    if auth_result != None:
-        return auth_result
-    if not request.args:
-        db = managedb()
-        resulthumid = db.query(utildb.select_last('humidity_table'))
-        db.die()
-        return jsonify(resulthumid)
-
-
-@app.route('/data/timerange/temperature/<string:range>', methods=['GET'])
+@app.route('/data/timerange/<string:range>', methods=['GET'])
 def get_In_Range_Temp(range):
     auth_result = assert_token(request, USER_TYPE_USER)
     if auth_result != None:
         return auth_result
     if not request.args:
         db = managedb()
-        resulttemp = db.query(utildb.select_between('temperature_table',range))
+        result = db.query(utildb.select_between('data_table',range))
         db.die()
-        return jsonify(resulttemp)
-
-
-@app.route('/data/timerange/humidity/<string:range>', methods=['GET'])
-def get_In_Range_Humid(range):
-    auth_result = assert_token(request, USER_TYPE_USER)
-    if auth_result != None:
-        return auth_result
-    if not request.args:
-        db = managedb()
-        resulthumid = db.query(utildb.select_between('humidity_table',range))
-        db.die()
-        return jsonify(resulthumid)
+        return jsonify(result)
 
 @app.route('/token', methods=['POST'])
 def issue_token():
@@ -156,24 +119,23 @@ def add_Data():
         return auth_result
 
     if not request.args:
-        temp = Temperature()
-        humid = Humidity()
-        temp.date_time = request.json['date_time']
-        humid.date_time = request.json['date_time']
-        temp.temperature = request.json['temperature']
-        humid.humidity = request.json['humidity']
-        temp.pi_id = request.json['pi_id']
-        humid.pi_id = request.json['pi_id']
+        r = request.get_json()
+        for x in r:
+            data = Data()
+            data.pi_id = x['pi_id']
+            data.data = x['data']
+            data.data_type = x['data_type']
+            data.date_time = x['date_time']
 
-        try:
-            db = managedb()
-            db.execute(utildb.insert('temperature_table', temp))
-            db.execute(utildb.insert('humidity_table', humid))
-        except Exception as e:
-            return flask.Response(response=str(e),status=500)
-        finally:
-            if db != None:
-                db.die()
+
+            try:
+                db = managedb()
+                db.execute(utildb.insert('data_table', data))
+            except Exception as e:
+                return flask.Response(response=str(e),status=500)
+            finally:
+                if db != None:
+                    db.die()
 
         return flask.Response(response="success", status=200)
 
@@ -206,11 +168,22 @@ def assert_token(request, user_type):
 app.run()
 
 # {
+#   "version": "2.0",
+#   "type": "temperature+humidity",
+#   "items": [
+#   { temp1...},
+#   { temp2....},
+#   ]}
+#
+#
+#
+
+# [{
 #     "date_time":"2030-01-01 20:59:59",
-#     "temperature":100.0,
-#     "humidity":200.0,
+#     "data":100.0,
+#     "data_type":"temperature",
 #     "pi_id":1
-# }
+# }]
 
 #
 # auth_result = assert_token(request, USER_TYPE_USER)
