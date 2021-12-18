@@ -68,11 +68,15 @@ def get_In_Range(range):
 
 @app.route('/token', methods=['POST'])
 def issue_token():
-    r = request.get_json()
-    if not isinstance(r,list):
-        r = json.loads(r)
-    username = r['username']
-    password = r['password']
+    try:
+            username = request.json['username']
+            password = request.json['password']
+    except:
+            r = request.get_json()
+            if not isinstance(r,list):
+                r = json.loads(r)
+            username = r['username']
+            password = r['password']
 
     if username == None or len(username) == 0:
         return flask.Response(response="missing mandatory username", status=400)
