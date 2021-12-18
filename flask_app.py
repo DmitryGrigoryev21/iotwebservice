@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import flask
 from flask import jsonify, request
-
+import json
 from utildb import utildb
 from managedb import managedb
 from dataClass import Data
@@ -68,8 +68,11 @@ def get_In_Range(range):
 
 @app.route('/token', methods=['POST'])
 def issue_token():
-    username = request.json['username']
-    password = request.json['password']
+    r = request.get_json()
+    if not isinstance(r,list):
+        r = json.loads(r)
+    username = r['username']
+    password = r['password']
 
     if username == None or len(username) == 0:
         return flask.Response(response="missing mandatory username", status=400)
@@ -120,6 +123,11 @@ def add_Data():
 
     if not request.args:
         r = request.get_json()
+        if not isinstance(r,list):
+            r = json.loads(r)
+        print(r)
+        print(isinstance(r,list))
+        print(type(r))
         for x in r:
             data = Data()
             data.pi_id = x['pi_id']
@@ -194,9 +202,6 @@ app.run()
 #   { temp1...},
 #   { temp2....},
 #   ]}
-#
-#
-#
 
 # [{
 #     "date_time":"2030-01-01 20:59:59",
